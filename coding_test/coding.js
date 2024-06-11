@@ -43,3 +43,69 @@ function runWithStdin() {
   });
 }
 runWithStdin();
+
+
+//以下はインプットの形式が異なる場合のコード
+
+//main.js
+const getSchoolCredit = require('./app.js');
+
+(async () => {
+  const [n, scores] = await readInputs();
+  const result = getSchoolCredit(n, scores);
+  print_result(result);
+})();
+
+async function readInputs() {
+  return new Promise((resolve, _) => {
+    const _lines = [];
+    const reader = require("readline").createInterface({
+      input: process.stdin,
+    });
+    reader.on("line", (line) => {
+      _lines.push(line);
+    });
+    reader.on("close", () => {
+      let index = 0;
+      const n = parseInt(_lines[index++]);
+      const n_scores = parseInt(_lines[index++]);
+      const scores = Array.from({ length: n_scores }).map(_ => {
+        let n_scores_2nd = parseInt(_lines[index++]);
+        const ret = _lines.slice(index, index + n_scores_2nd).map(v => parseInt(v));
+        index += n_scores_2nd;
+        return ret;
+      });
+      resolve([n, scores]);
+    });
+  });
+}
+
+function print_result(result) {
+  if (Array.isArray(result)) {
+    console.log(result.length);
+    result.forEach(r => print_result(r));
+  } else {
+    console.log(result);
+  }
+}
+
+//app.js
+function getSchoolCredit(n, scores) {
+  const results = []
+  for (let i = 0; i < n; i++) {
+    const [midterm, final] = scores[i];
+    
+    if (final <= 60 && (midterm + final) <= 100) {
+      results.push('fail');
+    } else if (final <= 60 || (midterm + final) <= 100) {
+      results.push('reexamination');
+    } else {
+      results.push('pass');
+    }
+  }
+
+  // 結果の出力
+  return results
+}
+
+module.exports = getSchoolCredit;
